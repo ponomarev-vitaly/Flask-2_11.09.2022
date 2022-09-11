@@ -1,6 +1,6 @@
 from api import Resource, reqparse, db
 from api.models.author import AuthorModel
-
+from api.schemas.author import AuthorSchema, authors_schema, author_schema
 
 class AuthorResource(Resource):
     def get(self, author_id=None):  # Если запрос приходит по url: /authors
@@ -24,7 +24,7 @@ class AuthorResource(Resource):
         author = AuthorModel(author_data["name"])
         db.session.add(author)
         db.session.commit()
-        return author.to_dict(), 201
+        return author_schema.dump(author), 201
 
     def put(self, author_id):
         parser = reqparse.RequestParser()
