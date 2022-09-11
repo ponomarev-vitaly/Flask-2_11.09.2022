@@ -20,8 +20,8 @@ class QuoteResource(Resource):
             quotes = author.quotes.all()
             return [quote.to_dict() for quote in quotes], 200  # Возвращаем все цитаты автора
 
-        quote = QuoteModel.query.get(id)
-        if quote is None:
+        quote = QuoteModel.query.get(quote_id)
+        if quote:
             return quote.to_dict(), 200
         return {"Error": "Quote not found"}, 404
 
@@ -30,7 +30,7 @@ class QuoteResource(Resource):
         parser.add_argument("text", required=True)
         quote_data = parser.parse_args()
         # TODO: раскомментируйте строку ниже, чтобы посмотреть quote_data
-        #   print(f"{quote_data=}")
+        # print(f"{quote_data=}")
         author = AuthorModel.query.get(author_id)
         if author is None:
             return {"Error": f"Author id={author_id} not found"}, 404
@@ -40,14 +40,18 @@ class QuoteResource(Resource):
         db.session.commit()
         return quote.to_dict(), 201
 
-    def put(self, quote_id):
+    def put(self, author_id, quote_id):
         parser = reqparse.RequestParser()
-        parser.add_argument("author")
+        # parser.add_argument("author")
         parser.add_argument("text")
         new_data = parser.parse_args()
 
         quote = QuoteModel.query.get(quote_id)
-        quote.author = new_data["author"]
+        if quote is None:
+            return {"Error": "Quote not found"}, 404
+        if quote.author.id != author.id:
+            return {"Error": "Цитата не принадлежит автору"}, 404
+       # quote.author = new_data["author"]
         quote.text = new_data["text"]
         db.session.commit()
         return quote.to_dict(), 200
